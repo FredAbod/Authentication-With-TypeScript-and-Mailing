@@ -52,7 +52,7 @@ export class EmailService {
       });
 
       const mailOptions = {
-        from: `"Your App" <${config.email.user}>`,
+        from: `"FredAbod" <${config.email.user}>`,
         to,
         subject: 'Verify Your Email',
         html,
@@ -81,7 +81,7 @@ export class EmailService {
       });
 
       const mailOptions = {
-        from: `"Your App" <${config.email.user}>`,
+        from: `"FredAbod" <${config.email.user}>`,
         to,
         subject: 'Reset Your Password',
         html,
