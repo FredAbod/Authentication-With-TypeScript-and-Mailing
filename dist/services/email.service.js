@@ -18,15 +18,18 @@ const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
 const config_1 = require("../config/config");
 class EmailService {
+    // Read and return the email template content from the specified file
     static getTemplate(templateName) {
         return __awaiter(this, void 0, void 0, function* () {
             const templatePath = path_1.default.join(__dirname, '../templates', `${templateName}.html`);
             return yield promises_1.default.readFile(templatePath, 'utf-8');
         });
     }
+    // Replace variables in the template with actual values
     static replaceTemplateVariables(template, variables) {
         return Object.entries(variables).reduce((acc, [key, value]) => acc.replace(new RegExp(`{{${key}}}`, 'g'), value), template);
     }
+    // Verify the SMTP connection
     static verifyConnection() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -40,6 +43,7 @@ class EmailService {
             }
         });
     }
+    // Send a verification email to the specified recipient
     static sendVerificationEmail(to, name, verificationToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -50,7 +54,7 @@ class EmailService {
                     verificationLink,
                 });
                 const mailOptions = {
-                    from: `"Your App" <${config_1.config.email.user}>`,
+                    from: `"FredAbod" <${config_1.config.email.user}>`,
                     to,
                     subject: 'Verify Your Email',
                     html,
@@ -64,6 +68,7 @@ class EmailService {
             }
         });
     }
+    // Send a password reset email to the specified recipient
     static sendPasswordResetEmail(to, name, resetToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -74,7 +79,7 @@ class EmailService {
                     resetLink,
                 });
                 const mailOptions = {
-                    from: `"Your App" <${config_1.config.email.user}>`,
+                    from: `"FredAbod" <${config_1.config.email.user}>`,
                     to,
                     subject: 'Reset Your Password',
                     html,
@@ -90,6 +95,7 @@ class EmailService {
     }
 }
 exports.EmailService = EmailService;
+// Create a transporter object using the default SMTP transport
 EmailService.transporter = nodemailer_1.default.createTransport({
     service: 'gmail',
     auth: {

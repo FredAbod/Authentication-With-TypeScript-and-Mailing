@@ -3,6 +3,10 @@ import { UserController } from '../controllers/user.controller';
 import { validateRequest } from '../middleware/validate';
 import { signupSchema, loginSchema, resetPasswordSchema, forgotPasswordSchema } from '../validators/user.validators';
 
+/**
+ * Initializes a new Router instance.
+ * This router will be used to define user-related routes.
+ */
 const router = Router();
 
 router.post('/signup', validateRequest(signupSchema), UserController.signup);

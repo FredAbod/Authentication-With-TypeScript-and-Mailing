@@ -4,6 +4,7 @@ import path from 'path';
 import { config } from '../config/config';
 
 export class EmailService {
+  // Create a transporter object using the default SMTP transport
   private static transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -14,11 +15,13 @@ export class EmailService {
     logger: true
   });
 
+  // Read and return the email template content from the specified file
   private static async getTemplate(templateName: string): Promise<string> {
     const templatePath = path.join(__dirname, '../templates', `${templateName}.html`);
     return await fs.readFile(templatePath, 'utf-8');
   }
 
+  // Replace variables in the template with actual values
   private static replaceTemplateVariables(template: string, variables: Record<string, string>): string {
     return Object.entries(variables).reduce(
       (acc, [key, value]) => acc.replace(new RegExp(`{{${key}}}`, 'g'), value),
@@ -26,6 +29,7 @@ export class EmailService {
     );
   }
 
+  // Verify the SMTP connection
   static async verifyConnection(): Promise<boolean> {
     try {
       await this.transporter.verify();
@@ -37,6 +41,7 @@ export class EmailService {
     }
   }
 
+  // Send a verification email to the specified recipient
   static async sendVerificationEmail(
     to: string,
     name: string,
@@ -66,6 +71,7 @@ export class EmailService {
     }
   }
 
+  // Send a password reset email to the specified recipient
   static async sendPasswordResetEmail(
     to: string,
     name: string,

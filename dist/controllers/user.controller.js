@@ -20,10 +20,12 @@ const config_1 = require("../config/config");
 const email_service_1 = require("../services/email.service");
 const crypto_1 = __importDefault(require("crypto"));
 class UserController {
+    // User signup method
     static signup(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, email, password } = req.body;
+                // Check if user already exists
                 const existingUser = yield user_Models_1.User.findOne({ email });
                 if (existingUser) {
                     res.status(400).json({
@@ -32,7 +34,7 @@ class UserController {
                     });
                     return;
                 }
-                // First verify SMTP connection
+                // Verify SMTP connection
                 const isEmailServiceWorking = yield email_service_1.EmailService.verifyConnection();
                 if (!isEmailServiceWorking) {
                     res.status(500).json({
@@ -41,8 +43,10 @@ class UserController {
                     });
                     return;
                 }
+                // Generate verification token and hash password
                 const verificationToken = crypto_1.default.randomBytes(32).toString('hex');
                 const hashedPassword = yield bcryptjs_1.default.hash(password, config_1.config.bcrypt.saltRounds);
+                // Create new user
                 const user = yield user_Models_1.User.create({
                     name,
                     email,
@@ -51,6 +55,7 @@ class UserController {
                     verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
                 });
                 try {
+                    // Send verification email
                     yield email_service_1.EmailService.sendVerificationEmail(email, name, verificationToken);
                     res.status(201).json({
                         status: 'success',
@@ -58,7 +63,7 @@ class UserController {
                     });
                 }
                 catch (emailError) {
-                    // If email fails, we should delete the user or mark them as requiring email verification retry
+                    // If email fails, mark user as requiring email verification retry
                     console.error('Failed to send verification email:', emailError);
                     yield user_Models_1.User.findByIdAndUpdate(user._id, {
                         $set: {
@@ -81,10 +86,12 @@ class UserController {
             }
         });
     }
+    // User login method
     static login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, password } = req.body;
+                // Find user by email
                 const user = yield user_Models_1.User.findOne({ email });
                 if (!user) {
                     res.status(401).json({
@@ -93,6 +100,7 @@ class UserController {
                     });
                     return;
                 }
+                // Check if user is verified
                 if (user.isVerified != true) {
                     res.status(401).json({
                         status: "error",
@@ -100,6 +108,7 @@ class UserController {
                     });
                     return;
                 }
+                // Validate password
                 const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
                 if (!isPasswordValid) {
                     res.status(401).json({
@@ -108,6 +117,7 @@ class UserController {
                     });
                     return;
                 }
+                // Generate JWT token
                 const token = jsonwebtoken_1.default.sign({ userId: user._id }, config_1.config.jwt.secret, {
                     expiresIn: config_1.config.jwt.expiresIn,
                 });
@@ -131,10 +141,12 @@ class UserController {
             }
         });
     }
+    // Email verification method
     static verifyEmail(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { token } = req.params;
+                // Find user by verification token
                 const user = yield user_Models_1.User.findOne({
                     verificationToken: token,
                     verificationTokenExpires: { $gt: new Date() },
@@ -146,6 +158,7 @@ class UserController {
                     });
                     return;
                 }
+                // Mark user as verified
                 user.isVerified = true;
                 user.verificationToken = undefined;
                 user.verificationTokenExpires = undefined;
@@ -163,10 +176,12 @@ class UserController {
             }
         });
     }
+    // Forgot password method
     static forgotPassword(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
+                // Find user by email
                 const user = yield user_Models_1.User.findOne({ email });
                 if (!user) {
                     res.status(404).json({
@@ -184,11 +199,13 @@ class UserController {
                     });
                     return;
                 }
+                // Generate reset token
                 const resetToken = crypto_1.default.randomBytes(32).toString('hex');
                 user.resetPasswordToken = resetToken;
                 user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
                 yield user.save();
                 try {
+                    // Send password reset email
                     yield email_service_1.EmailService.sendPasswordResetEmail(email, user.name, resetToken);
                     res.json({
                         status: 'success',
@@ -216,11 +233,13 @@ class UserController {
             }
         });
     }
+    // Reset password method
     static resetPassword(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { token } = req.params;
                 const { password } = req.body;
+                // Find user by reset token
                 const user = yield user_Models_1.User.findOne({
                     resetPasswordToken: token,
                     resetPasswordExpires: { $gt: new Date() },
@@ -232,6 +251,7 @@ class UserController {
                     });
                     return;
                 }
+                // Hash new password and save
                 const hashedPassword = yield bcryptjs_1.default.hash(password, config_1.config.bcrypt.saltRounds);
                 user.password = hashedPassword;
                 user.resetPasswordToken = undefined;

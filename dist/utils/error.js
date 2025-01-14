@@ -14,6 +14,16 @@ const createCustomError = (message, statusCode) => {
     return new CustomError(message, statusCode);
 };
 exports.createCustomError = createCustomError;
+/**
+ * Handles errors in controller functions and sends appropriate HTTP responses.
+ *
+ * @param error - The error object that was thrown.
+ * @param res - The Express response object.
+ * @returns The HTTP response with the appropriate status code and error message.
+ *
+ * If the error is an instance of `CustomError`, it sends a response with the status code and message from the error.
+ * Otherwise, it logs the error to the console and sends a 500 Internal Server Error response.
+ */
 const handleControllerError = (error, res) => {
     if (error instanceof CustomError) {
         return res.status(error.statusCode).json({

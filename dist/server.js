@@ -15,6 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = require("./config/config");
 const app_1 = __importDefault(require("./app"));
+/**
+ * Starts the server by connecting to MongoDB and then listening on the specified port.
+ *
+ * @async
+ * @function startServer
+ * @throws Will throw an error if the server fails to start.
+ * @returns {Promise<void>} A promise that resolves when the server is successfully started.
+ */
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield mongoose_1.default.connect(config_1.config.mongodb.uri);
